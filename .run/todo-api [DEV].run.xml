@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="todo-api [DEV]" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="todo-svc" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="--auth-mode=dev" />
+    <kind value="FILE" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/app/services/todo-api/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
