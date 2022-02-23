@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"time"
+	"todo-svc/app/services/todo-api/config"
 	"todo-svc/app/services/todo-api/handlers"
 	"todo-svc/business/database"
 )
@@ -27,29 +27,7 @@ func run(logg *log.Logger) error {
 	cpus := runtime.NumCPU()
 	logg.Printf("Have %d CPUs", cpus)
 
-	cfg := struct {
-		conf.Version
-		Web struct {
-			ReadTimeout     time.Duration `conf:"default:5s"`
-			WriteTimeout    time.Duration `conf:"default:10s"`
-			IdleTimeout     time.Duration `conf:"default:120s"`
-			ShutdownTimeout time.Duration `conf:"default:20s"`
-			APIHost         string        `conf:"default:0.0.0.0:3000"`
-			DebugHost       string        `conf:"default:0.0.0.0:4000"`
-		}
-		Auth struct {
-			KeysFolder string `conf:"default:zarf/keys/"`
-		}
-		DB struct {
-			User         string `conf:"default:postgres"`
-			Password     string `conf:"default:postgres,mask"`
-			Host         string `conf:"default:localhost"`
-			Name         string `conf:"default:postgres"`
-			MaxIdleConns int    `conf:"default:0"`
-			MaxOpenConns int    `conf:"default:0"`
-			DisableTLS   bool   `conf:"default:true"`
-		}
-	}{
+	cfg := config.Config{
 		Version: conf.Version{
 			Build: build,
 			Desc:  "Todo Item API",
@@ -83,8 +61,13 @@ func run(logg *log.Logger) error {
 	}
 
 	// Should setup server mux
-	if err := handlers.SetupHandlers(logg, pers); err != nil {
+	app, err := handlers.SetupHandlers(logg, cfg, pers)
+	if err != nil {
 		return fmt.Errorf("error initializing handlers: %w", err)
+	}
+
+	if err := app.Listen(cfg.Web.APIHost); err != nil {
+		logg.Fatalf("Error occurred during server listen: [%T] %v\n", err, err)
 	}
 
 	return nil
