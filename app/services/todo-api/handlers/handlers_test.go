@@ -158,14 +158,14 @@ func TestDeleteTodo(t *testing.T) {
 func setupHandlers(t *testing.T) (*fiber.App, database.Persistence) {
 	logg := log.New(os.Stderr, "Testing!!! ", log.LstdFlags)
 	cfg := config.Config{
-		Web: config.WebConfig{
+		Web: &config.WebConfig{
 			ReadTimeout:     10 * time.Second,
 			WriteTimeout:    10 * time.Second,
 			IdleTimeout:     10 * time.Second,
 			ShutdownTimeout: 10 * time.Second,
 		},
-		Auth: config.AuthConfig{
-			AuthMode: "dev",
+		Auth: &config.AuthConfig{
+			Mode: "dev",
 		},
 	}
 	pers, err := database.NewMemoryPersistence()

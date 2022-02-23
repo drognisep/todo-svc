@@ -11,6 +11,7 @@ import (
 	"todo-svc/app/services/todo-api/config"
 	"todo-svc/app/services/todo-api/handlers"
 	"todo-svc/business/database"
+	"todo-svc/foundation/management"
 )
 
 var build = "develop"
@@ -48,10 +49,6 @@ func run(logg *log.Logger) error {
 		return fmt.Errorf("generating config for output: %w", err)
 	}
 	logg.Println(out)
-
-	logg.Println("Starting todo-api service")
-	defer logg.Println("Shutdown complete")
-
 	expvar.NewString("build").Set(build)
 
 	// Setup persistence
@@ -60,15 +57,17 @@ func run(logg *log.Logger) error {
 		return fmt.Errorf("error initializing database connection: %w", err)
 	}
 
-	// Should setup server mux
+	// Setup server mux
 	app, err := handlers.SetupHandlers(logg, cfg, pers)
 	if err != nil {
 		return fmt.Errorf("error initializing handlers: %w", err)
 	}
 
-	if err := app.Listen(cfg.Web.APIHost); err != nil {
-		logg.Fatalf("Error occurred during server listen: [%T] %v\n", err, err)
-	}
+	// Setup context cancellation and start the server
+	ctx := management.InterruptContext(logg)
+	httpDone := management.AsyncListen(ctx, cfg, logg, app)
 
+	// Wait for the HTTP side to complete shutdown
+	<-httpDone
 	return nil
 }

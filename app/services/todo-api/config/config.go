@@ -12,18 +12,19 @@ type WebConfig struct {
 	ShutdownTimeout time.Duration `conf:"default:20s"`
 	APIHost         string        `conf:"default:0.0.0.0:3000"`
 	DebugHost       string        `conf:"default:0.0.0.0:4000"`
+	CertFile        string        `conf:"default:cert.pem"`
+	KeyFile         string        `conf:"default:key.pem"`
 }
 
 type AuthConfig struct {
-	KeysFolder string `conf:"default:zarf/keys/"`
 	// DO NOT change this to default to "dev"
-	AuthMode string `conf:"default:prod"`
+	Mode string `conf:"default:prod"`
 }
 
 type Config struct {
 	conf.Version
-	Web  WebConfig
-	Auth AuthConfig
+	Web  *WebConfig
+	Auth *AuthConfig
 	DB   struct {
 		User         string `conf:"default:postgres"`
 		Password     string `conf:"default:postgres,mask"`

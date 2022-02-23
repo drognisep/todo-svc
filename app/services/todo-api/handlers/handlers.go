@@ -43,7 +43,7 @@ func SetupHandlers(logg *log.Logger, cfg config.Config, pers database.Persistenc
 			return func(user string, pass string) bool {
 				var hash []byte
 				var ok bool
-				if cfg.Auth.AuthMode == "dev" {
+				if cfg.Auth.Mode == "dev" {
 					logg.Println("Checking against DEV credentials")
 					hash, ok = devCreds[user]
 					if !ok {
