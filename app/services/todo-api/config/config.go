@@ -14,13 +14,17 @@ type WebConfig struct {
 	DebugHost       string        `conf:"default:0.0.0.0:4000"`
 }
 
+type AuthConfig struct {
+	KeysFolder string `conf:"default:zarf/keys/"`
+	// DO NOT change this to default to "dev"
+	AuthMode string `conf:"default:prod"`
+}
+
 type Config struct {
 	conf.Version
 	Web  WebConfig
-	Auth struct {
-		KeysFolder string `conf:"default:zarf/keys/"`
-	}
-	DB struct {
+	Auth AuthConfig
+	DB   struct {
 		User         string `conf:"default:postgres"`
 		Password     string `conf:"default:postgres,mask"`
 		Host         string `conf:"default:localhost"`

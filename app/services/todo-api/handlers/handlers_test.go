@@ -20,6 +20,7 @@ func TestGetAllTodos(t *testing.T) {
 	app, pers := setupHandlers(t)
 	req, err := http.NewRequest("GET", "/api/v1/todo", nil)
 	assert.NoError(t, err)
+	req.SetBasicAuth("bob", "bob")
 
 	{
 		resp, err := app.Test(req)
@@ -50,6 +51,7 @@ func TestGetSingleTodo(t *testing.T) {
 	app, pers := setupHandlers(t)
 	req, err := http.NewRequest("GET", "/api/v1/todo/1", nil)
 	assert.NoError(t, err)
+	req.SetBasicAuth("bob", "bob")
 
 	{
 		resp, err := app.Test(req)
@@ -83,6 +85,7 @@ func TestCreateTodo(t *testing.T) {
 	req, err := http.NewRequest("POST", "/api/v1/todo", bytes.NewReader(buf))
 	assert.NoError(t, err)
 	req.Header.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+	req.SetBasicAuth("bob", "bob")
 
 	resp, err := app.Test(req)
 	assert.NoError(t, err)
@@ -109,6 +112,7 @@ func TestUpdateTodo(t *testing.T) {
 	req, err := http.NewRequest("PUT", "/api/v1/todo/1", bytes.NewReader(updateBody))
 	assert.NoError(t, err)
 	req.Header.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+	req.SetBasicAuth("bob", "bob")
 
 	{
 		resp, err := app.Test(req)
@@ -133,6 +137,7 @@ func TestDeleteTodo(t *testing.T) {
 
 	req, err := http.NewRequest("DELETE", "/api/v1/todo/1", nil)
 	assert.NoError(t, err)
+	req.SetBasicAuth("bob", "bob")
 
 	{
 		resp, err := app.Test(req)
@@ -158,6 +163,9 @@ func setupHandlers(t *testing.T) (*fiber.App, database.Persistence) {
 			WriteTimeout:    10 * time.Second,
 			IdleTimeout:     10 * time.Second,
 			ShutdownTimeout: 10 * time.Second,
+		},
+		Auth: config.AuthConfig{
+			AuthMode: "dev",
 		},
 	}
 	pers, err := database.NewMemoryPersistence()

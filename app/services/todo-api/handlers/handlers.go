@@ -4,12 +4,15 @@ package handlers
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	recovery "github.com/gofiber/fiber/v2/middleware/recover"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"todo-svc/app/services/todo-api/config"
 	"todo-svc/business/database"
 	"todo-svc/foundation/model"
+	"todo-svc/zarf/keys"
 )
 
 const (
@@ -30,6 +33,32 @@ func SetupHandlers(logg *log.Logger, cfg config.Config, pers database.Persistenc
 	api := a.Group("/api/v1", recovery.New(), logger.New(logger.Config{
 		TimeZone: "UTC",
 		Output:   logg.Writer(),
+	}), basicauth.New(basicauth.Config{
+		Realm: "todo-api",
+		Authorizer: func() func(string, string) bool {
+			devCreds, err := keys.GetDevAuth()
+			if err != nil {
+				panic("failed to get development credential store")
+			}
+			return func(user string, pass string) bool {
+				var hash []byte
+				var ok bool
+				if cfg.Auth.AuthMode == "dev" {
+					logg.Println("Checking against DEV credentials")
+					hash, ok = devCreds[user]
+					if !ok {
+						return false
+					}
+				} else {
+					//TODO: Provide real auth source
+					panic("unimplemented")
+				}
+				if err := bcrypt.CompareHashAndPassword(hash, []byte(pass)); err != nil {
+					return false
+				}
+				return true
+			}
+		}(),
 	}))
 
 	todos := api.Group("/todo")
