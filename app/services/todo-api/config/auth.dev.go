@@ -1,4 +1,4 @@
-package keys
+package config
 
 import (
 	_ "embed"

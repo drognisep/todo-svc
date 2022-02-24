@@ -12,7 +12,6 @@ import (
 	"todo-svc/app/services/todo-api/config"
 	"todo-svc/business/database"
 	"todo-svc/foundation/model"
-	"todo-svc/zarf/keys"
 )
 
 const (
@@ -36,7 +35,7 @@ func SetupHandlers(logg *log.Logger, cfg config.Config, pers database.Persistenc
 	}), basicauth.New(basicauth.Config{
 		Realm: "todo-api",
 		Authorizer: func() func(string, string) bool {
-			devCreds, err := keys.GetDevAuth()
+			devCreds, err := config.GetDevAuth()
 			if err != nil {
 				panic("failed to get development credential store")
 			}
@@ -84,6 +83,9 @@ func SetupHandlers(logg *log.Logger, cfg config.Config, pers database.Persistenc
 		allTodos, err := pers.GetAllTodos()
 		if err != nil {
 			return err
+		}
+		if allTodos == nil {
+			allTodos = []*model.TodoItem{}
 		}
 		return ctx.Status(fiber.StatusOK).JSON(allTodos)
 	})
